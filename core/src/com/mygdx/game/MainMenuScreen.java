@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.mygdx.game.utils.Learn;
+import com.mygdx.game.utils.TipoPantalla;
 
 public class MainMenuScreen extends Screens {
 
@@ -17,7 +17,7 @@ public class MainMenuScreen extends Screens {
         Table menu = new Table();
         menu.defaults().expandY().fillY();
 
-        for (final Learn learn : Learn.values()) {
+        for (final TipoPantalla learn : TipoPantalla.values()) {
             TextButton bt = new TextButton(learn.name, Assets.txButtonStyle);
             bt.addListener(new ClickListener() {
                 @Override
@@ -36,7 +36,7 @@ public class MainMenuScreen extends Screens {
         stage.addActor(scroll);
     }
 
-    private void setScreen(Learn learn) {
+    private void setScreen(TipoPantalla learn) {
         try {
             Screens newScreen = learn.clazz.getConstructor(MyGdxGame.class).newInstance(game);
             game.setScreen(newScreen);

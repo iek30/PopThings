@@ -1,9 +1,9 @@
-package com.mygdx.game.tutoriales;
+package com.mygdx.game.classes;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -13,12 +13,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactImpulse;
-import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -28,9 +24,9 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.Screens;
 
 
-public class Learn1 extends Screens {
+public class Partida extends Screens {
 
-    static int puntos = 0;
+    static int puntos = 0, cont = 0;
     Box2DDebugRenderer renderer;
     World oWorld;
 
@@ -40,12 +36,15 @@ public class Learn1 extends Screens {
     Array<GameObject> arrGameObjects;
 
     // Images of the ball and box
-    TextureRegion ball, java,zombi;
+    TextureRegion background, ball, java, zombi, android;
     Animation<TextureRegion> explosion;
 
 
-    public Learn1(MyGdxGame game) {
+    public Partida(MyGdxGame game) {
         super(game);
+        background = new TextureRegion(new Texture(Gdx.files.internal("fondo.png")));
+
+
         Vector2 gravity = new Vector2(0, -9.8f);
         oWorld = new World(gravity, true);
         oWorld.setContactListener(new CollisionListener());
@@ -58,7 +57,7 @@ public class Learn1 extends Screens {
         ball = Utils.getRegion("ball.png");
         java = Utils.getRegion("java.png");
         zombi = Utils.getRegion("zombi.png");
-
+        android = Utils.getRegion("android.png");
 
 
         TextureRegion exp1 = Utils.getRegion("explosion/explosion1.png");
@@ -166,6 +165,7 @@ public class Learn1 extends Screens {
         arrGameObjects.add(obj);
 
         shape.dispose();
+        cont++;
     }
 
     private void createJava(float x, float y) {
@@ -192,6 +192,7 @@ public class Learn1 extends Screens {
         arrGameObjects.add(obj);
 
         shape.dispose();
+        cont++;
     }
 
     private void createZombi(float x, float y) {
@@ -217,14 +218,40 @@ public class Learn1 extends Screens {
         arrGameObjects.add(obj);
 
         shape.dispose();
+        cont++;
     }
 
+    private void createAndroid(float x, float y) {
+        GameObject obj = new GameObject(x, 12.8f, GameObject.BALL);
 
+        BodyDef bd = new BodyDef();
+        bd.position.x = obj.position.x;
+        bd.position.y = obj.position.y;
+        bd.type = BodyType.DynamicBody;
 
+        CircleShape shape = new CircleShape();
+        // Aumentar el radio del círculo para hacerlo más grande
+        shape.setRadius(.3f);
+
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = shape;
+        fixDef.density = 15;
+        fixDef.friction = .5f;
+        fixDef.restitution = .5f;
+
+        Body oBody = oWorld.createBody(bd);
+        oBody.createFixture(fixDef);
+        oBody.setUserData(obj);
+        arrGameObjects.add(obj);
+
+        shape.dispose();
+        cont++;
+    }
 
 
     @Override
     public void update(float delta) {
+
 
         // Every time we touch we create a new object
         if (Gdx.input.justTouched()) {
@@ -232,11 +259,12 @@ public class Learn1 extends Screens {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), 5, 0);
             oCamBox2D.unproject(touchPos);
 
-            int res = MathUtils.random(2);
+            int res = MathUtils.random(3);
 
             if (res==0) createBall(touchPos.x, touchPos.y);
             else if (res==1) createZombi(touchPos.x,touchPos.y);
-            else createJava(touchPos.x, touchPos.y);
+            else if (res ==2) createJava(touchPos.x, touchPos.y);
+            else createAndroid(touchPos.x, touchPos.y);
         }
 
         oWorld.step(delta, 8, 6);
@@ -268,12 +296,25 @@ public class Learn1 extends Screens {
 
     @Override
     public void draw(float delta) {
+
         oCamUI.update();
         spriteBatch.setProjectionMatrix(oCamUI.combined);
 
         spriteBatch.begin();
-        Assets.font.draw(spriteBatch, "Puntos:" + puntos, 0, 470);
-        Assets.font.draw(spriteBatch, "fps:" + Gdx.graphics.getFramesPerSecond(), 0, 20);
+        spriteBatch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        spriteBatch.end();
+
+        spriteBatch.begin();
+        Assets.font.draw(spriteBatch, "Puntos: " + puntos, SCREEN_WIDTH-500, SCREEN_HEIGHT - 50);
+        Assets.font.setColor(Color.BROWN);
+        float scaleFactor = 5f;
+        Assets.font.getData().setScale(scaleFactor);
+        spriteBatch.end();
+
+        spriteBatch.begin();
+        Assets.font.draw(spriteBatch, cont+"/20", SCREEN_WIDTH-500, SCREEN_HEIGHT - 150);
+        Assets.font.setColor(Color.BROWN);
+        Assets.font.getData().setScale(scaleFactor);
         spriteBatch.end();
 
         oCamBox2D.update();
@@ -303,11 +344,17 @@ public class Learn1 extends Screens {
                     spriteBatch.draw(keyframe, obj.position.x - .3f, obj.position.y - .3f, .3f, .3f,
                             .6f, .6f, 1, 1, obj.angleDeg);
                 }
+                else if (obj.type == GameObject.ANDROID){
+                    keyframe = android;
+                    spriteBatch.draw(keyframe, obj.position.x - .3f, obj.position.y - .3f, .3f, .3f,
+                            .6f, .6f, 1, 1, obj.angleDeg);
+                }
                 else {
                     keyframe = ball;
                     spriteBatch.draw(keyframe, obj.position.x - .15f, obj.position.y - .15f, .15f, .15f,
                             .3f, .3f, 1, 1, obj.angleDeg);
                 }
+
             }
 
 
@@ -325,100 +372,6 @@ public class Learn1 extends Screens {
         super.dispose();
     }
 
-    static private class GameObject {
-        static final int BALL = 0;
-        static final int JAVA = 1;
-        static final int ZOMBI = 2;
-
-        static final int STATE_NORMAL = 0;
-        static final int STATE_EXPLODE = 1;
-        static final int STATE_REMOVE = 2;
-
-        static final float EXPLOSION_DURATION = 0.95f;
-
-        int state;
-        float stateTime = 0;
 
 
-        final int type;
-        float angleDeg;
-        Vector2 position;
-
-        public GameObject(float x, float y, int type) {
-            position = new Vector2(x, y);
-            state = STATE_NORMAL;
-            this.type = type;
-        }
-
-        public void update(Body body, float delta) {
-            if (state == STATE_NORMAL) {
-                position.x = body.getPosition().x;
-                position.y = body.getPosition().y;
-                angleDeg = (float) Math.toDegrees(body.getAngle());
-            } else if (state == STATE_EXPLODE) {
-                if (stateTime >= EXPLOSION_DURATION) {
-                    state = STATE_REMOVE;
-                    stateTime = 0;
-                }
-            }
-            stateTime += delta;
-        }
-
-        public void hit() {
-            if (state == STATE_NORMAL) {
-                state = STATE_EXPLODE;
-                stateTime = 0;
-                puntos++;
-            }
-        }
-    }
-
-    static private class CollisionListener implements ContactListener {
-
-        @Override
-        public void beginContact(Contact contact) {
-            Body bodyA = contact.getFixtureA().getBody();
-            Body bodyB = contact.getFixtureB().getBody();
-
-            if (bodyA.getUserData() instanceof GameObject && bodyB.getUserData() instanceof GameObject) {
-                GameObject gameObjectA = (GameObject) bodyA.getUserData();
-                GameObject gameObjectB = (GameObject) bodyB.getUserData();
-
-                if (gameObjectA.type == gameObjectB.type) {
-                    if (gameObjectA.state == GameObject.STATE_NORMAL && gameObjectB.state == GameObject.STATE_NORMAL) {
-                        gameObjectA.hit();
-                        gameObjectB.hit();
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void endContact(Contact contact) {
-
-        }
-
-        @Override
-        public void preSolve(Contact contact, Manifold oldManifold) {
-            Body bodyA = contact.getFixtureA().getBody();
-            Body bodyB = contact.getFixtureB().getBody();
-
-            if (bodyA.getUserData() instanceof GameObject && bodyB.getUserData() instanceof GameObject) {
-                GameObject gameObjectA = (GameObject) bodyA.getUserData();
-                GameObject gameObjectB = (GameObject) bodyB.getUserData();
-
-                if (gameObjectA.state != GameObject.STATE_NORMAL || gameObjectB.state != GameObject.STATE_NORMAL)
-                    contact.setEnabled(false);
-                else
-                    contact.setEnabled(true);
-            }
-
-        }
-
-        @Override
-        public void postSolve(Contact contact, ContactImpulse impulse) {
-
-        }
-
-    }
 }
