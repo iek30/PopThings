@@ -40,7 +40,7 @@ public class Learn1 extends Screens {
     Array<GameObject> arrGameObjects;
 
     // Images of the ball and box
-    TextureRegion ball, box;
+    TextureRegion ball, java,zombi;
     Animation<TextureRegion> explosion;
 
 
@@ -56,7 +56,9 @@ public class Learn1 extends Screens {
 
         // Load the images
         ball = Utils.getRegion("ball.png");
-        box = Utils.getRegion("box.png");
+        java = Utils.getRegion("java.png");
+        zombi = Utils.getRegion("zombi.png");
+
 
 
         TextureRegion exp1 = Utils.getRegion("explosion/explosion1.png");
@@ -85,6 +87,8 @@ public class Learn1 extends Screens {
                 exp15, exp16, exp17, exp18, exp19);
 
         createFloor();
+        createLeftWall();
+        createRightWall();
     }
 
     private void createFloor() {
@@ -93,7 +97,7 @@ public class Learn1 extends Screens {
         bd.type = BodyType.StaticBody;
 
         EdgeShape shape = new EdgeShape();
-        shape.set(0, 0, WORLD_WIDTH, 0);
+        shape.set(0, 0, WORLD_WIDTH + 20, 0);
 
         FixtureDef fixDef = new FixtureDef();
         fixDef.shape = shape;
@@ -103,6 +107,41 @@ public class Learn1 extends Screens {
         oBody.createFixture(fixDef);
         shape.dispose();
     }
+
+    private void createLeftWall() {
+        BodyDef bd = new BodyDef();
+        bd.position.set(0, .6f);
+        bd.type = BodyType.StaticBody;
+
+        EdgeShape shape = new EdgeShape();
+        shape.set(0, 0, 0, WORLD_HEIGHT + 20);
+
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = shape;
+        fixDef.friction = .7f;
+
+        Body oBody = oWorld.createBody(bd);
+        oBody.createFixture(fixDef);
+        shape.dispose();
+    }
+
+    private void createRightWall() {
+        BodyDef bd = new BodyDef();
+        bd.position.set(WORLD_WIDTH, 0);
+        bd.type = BodyType.StaticBody;
+
+        EdgeShape shape = new EdgeShape();
+        shape.set(0, 0, 0, WORLD_HEIGHT);
+
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = shape;
+        fixDef.friction = .7f;
+
+        Body oBody = oWorld.createBody(bd);
+        oBody.createFixture(fixDef);
+        shape.dispose();
+    }
+
 
     private void createBall(float x, float y) {
         GameObject obj = new GameObject(x, 12.8f, GameObject.BALL);
@@ -129,8 +168,8 @@ public class Learn1 extends Screens {
         shape.dispose();
     }
 
-    private void createBox(float x, float y) {
-        GameObject obj = new GameObject(x, 12.8f, GameObject.BOX);
+    private void createJava(float x, float y) {
+        GameObject obj = new GameObject(x, 12.8f, GameObject.JAVA);
 
         BodyDef bd = new BodyDef();
         bd.position.x = obj.position.x;
@@ -138,7 +177,8 @@ public class Learn1 extends Screens {
         bd.type = BodyType.DynamicBody;
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(.15f, .15f);
+        // Ajustar el tamaño del objeto de colisión
+        shape.setAsBox(.3f, .3f);
 
         FixtureDef fixDef = new FixtureDef();
         fixDef.shape = shape;
@@ -154,6 +194,35 @@ public class Learn1 extends Screens {
         shape.dispose();
     }
 
+    private void createZombi(float x, float y) {
+        GameObject obj = new GameObject(x, 12.8f, GameObject.ZOMBI);
+
+        BodyDef bd = new BodyDef();
+        bd.position.x = obj.position.x;
+        bd.position.y = obj.position.y;
+        bd.type = BodyType.DynamicBody;
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(.15f);
+
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = shape;
+        fixDef.density = 15;
+        fixDef.friction = .5f;
+        fixDef.restitution = .5f;
+
+        Body oBody = oWorld.createBody(bd);
+        oBody.createFixture(fixDef);
+        oBody.setUserData(obj);
+        arrGameObjects.add(obj);
+
+        shape.dispose();
+    }
+
+
+
+
+
     @Override
     public void update(float delta) {
 
@@ -163,11 +232,11 @@ public class Learn1 extends Screens {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), 5, 0);
             oCamBox2D.unproject(touchPos);
 
-            if (MathUtils.randomBoolean()){
-                createBall(touchPos.x, touchPos.y);
-            }
-            else
-                createBox(touchPos.x, touchPos.y);
+            int res = MathUtils.random(2);
+
+            if (res==0) createBall(touchPos.x, touchPos.y);
+            else if (res==1) createZombi(touchPos.x,touchPos.y);
+            else createJava(touchPos.x, touchPos.y);
         }
 
         oWorld.step(delta, 8, 6);
@@ -223,14 +292,24 @@ public class Learn1 extends Screens {
             TextureRegion keyframe;
 
             if (obj.state == GameObject.STATE_NORMAL) {
-                if (obj.type == GameObject.BOX)
-                    keyframe = box;
-                else
+                if (obj.type == GameObject.ZOMBI) {
+                    // Ajustar el tamaño del zombi para que sea más grande
+                    keyframe = zombi;
+                    spriteBatch.draw(keyframe, obj.position.x - .15f, obj.position.y - .15f, .15f, .15f,
+                            .3f, .3f, 1, 1, obj.angleDeg);
+                }
+                else if (obj.type == GameObject.JAVA){
+                    keyframe = java;
+                    spriteBatch.draw(keyframe, obj.position.x - .3f, obj.position.y - .3f, .3f, .3f,
+                            .6f, .6f, 1, 1, obj.angleDeg);
+                }
+                else {
                     keyframe = ball;
-
-                spriteBatch.draw(keyframe, obj.position.x - .15f, obj.position.y - .15f, .15f, .15f,
-                        .3f, .3f, 1, 1, obj.angleDeg);
+                    spriteBatch.draw(keyframe, obj.position.x - .15f, obj.position.y - .15f, .15f, .15f,
+                            .3f, .3f, 1, 1, obj.angleDeg);
+                }
             }
+
 
 
             if (obj.state == GameObject.STATE_EXPLODE) {
@@ -248,7 +327,8 @@ public class Learn1 extends Screens {
 
     static private class GameObject {
         static final int BALL = 0;
-        static final int BOX = 1;
+        static final int JAVA = 1;
+        static final int ZOMBI = 2;
 
         static final int STATE_NORMAL = 0;
         static final int STATE_EXPLODE = 1;
