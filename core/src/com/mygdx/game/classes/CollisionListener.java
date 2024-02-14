@@ -21,6 +21,7 @@ class CollisionListener implements ContactListener {
                 if (gameObjectA.state == GameObject.STATE_NORMAL && gameObjectB.state == GameObject.STATE_NORMAL) {
                     gameObjectA.hit();
                     gameObjectB.hit();
+                    Partida.sonido4.play();
                 }
             }
         }

@@ -1,6 +1,9 @@
 package com.mygdx.game.classes;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -26,7 +29,11 @@ import com.mygdx.game.Screens;
 
 public class Partida extends Screens {
 
+    Sound sonido1, sonido2, sonido3;
+    static Sound sonido4;
+    Music musica;
     static int puntos = 0, cont = 0;
+    private final static int MAX = 5;
     Box2DDebugRenderer renderer;
     World oWorld;
 
@@ -42,8 +49,17 @@ public class Partida extends Screens {
 
     public Partida(MyGdxGame game) {
         super(game);
-        background = new TextureRegion(new Texture(Gdx.files.internal("fondo.png")));
 
+        sonido1 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido1.m4a"));
+        sonido2 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido2.m4a"));
+        sonido3 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido3.m4a"));
+        sonido4 = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion_sound.wav"));
+        musica = Gdx.audio.newMusic(Gdx.files.internal("sounds/main_sound.wav"));
+        musica.play();
+        musica.setLooping(true);
+        musica.setVolume(0.3f);
+
+        background = new TextureRegion(new Texture(Gdx.files.internal("fondo.png")));
 
         Vector2 gravity = new Vector2(0, -9.8f);
         oWorld = new World(gravity, true);
@@ -193,6 +209,8 @@ public class Partida extends Screens {
 
         shape.dispose();
         cont++;
+
+        sonido2.play();
     }
 
     private void createZombi(float x, float y) {
@@ -219,10 +237,12 @@ public class Partida extends Screens {
 
         shape.dispose();
         cont++;
+
+        sonido1.play();
     }
 
     private void createAndroid(float x, float y) {
-        GameObject obj = new GameObject(x, 12.8f, GameObject.BALL);
+        GameObject obj = new GameObject(x, 12.8f, GameObject.ANDROID);
 
         BodyDef bd = new BodyDef();
         bd.position.x = obj.position.x;
@@ -246,6 +266,8 @@ public class Partida extends Screens {
 
         shape.dispose();
         cont++;
+
+        sonido3.play();
     }
 
 
@@ -312,7 +334,7 @@ public class Partida extends Screens {
         spriteBatch.end();
 
         spriteBatch.begin();
-        Assets.font.draw(spriteBatch, cont+"/20", SCREEN_WIDTH-500, SCREEN_HEIGHT - 150);
+        Assets.font.draw(spriteBatch, cont+"/"+MAX, SCREEN_WIDTH-500, SCREEN_HEIGHT - 150);
         Assets.font.setColor(Color.BROWN);
         Assets.font.getData().setScale(scaleFactor);
         spriteBatch.end();
