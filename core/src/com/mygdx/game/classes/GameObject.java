@@ -9,6 +9,8 @@ public class GameObject {
     static final int JAVA = 1;
     static final int ZOMBI = 2;
     static final int ANDROID = 3;
+    static final int JUAN = 4;
+    static final int CHRIS = 5;
 
     static final int STATE_NORMAL = 0;
     static final int STATE_EXPLODE = 1;

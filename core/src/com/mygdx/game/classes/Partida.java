@@ -26,6 +26,11 @@ import com.mygdx.game.Assets;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.Screens;
 
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+
 
 public class Partida extends Screens {
 
@@ -33,7 +38,9 @@ public class Partida extends Screens {
     static Sound sonido4;
     Music musica;
     static int puntos = 0, cont = 0;
-    private final static int MAX = 5;
+    private final static int MAX = 6;
+    private int res;
+    private String mensaje;
     Box2DDebugRenderer renderer;
     World oWorld;
 
@@ -43,17 +50,22 @@ public class Partida extends Screens {
     Array<GameObject> arrGameObjects;
 
     // Images of the ball and box
-    TextureRegion background, ball, java, zombi, android;
+    TextureRegion background, ball, java, zombi, android, juan, chris;
     Animation<TextureRegion> explosion;
+
 
 
     public Partida(MyGdxGame game) {
         super(game);
 
+        this.res = MathUtils.random(4);
+        mostrarSiguiente();
+
         sonido1 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido1.m4a"));
         sonido2 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido2.m4a"));
         sonido3 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido3.m4a"));
         sonido4 = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion_sound.wav"));
+        sonido4.setVolume(sonido4.play(),0.2f);
         musica = Gdx.audio.newMusic(Gdx.files.internal("sounds/main_sound.wav"));
         musica.play();
         musica.setLooping(true);
@@ -74,6 +86,8 @@ public class Partida extends Screens {
         java = Utils.getRegion("java.png");
         zombi = Utils.getRegion("zombi.png");
         android = Utils.getRegion("android.png");
+        juan = Utils.getRegion("juan.png");
+        chris = Utils.getRegion("chris.png");
 
 
         TextureRegion exp1 = Utils.getRegion("explosion/explosion1.png");
@@ -182,6 +196,34 @@ public class Partida extends Screens {
 
         shape.dispose();
         cont++;
+        this.res = MathUtils.random(5);
+    }
+
+    private void createChris(float x, float y) {
+        GameObject obj = new GameObject(x, 12.8f, GameObject.CHRIS);
+
+        BodyDef bd = new BodyDef();
+        bd.position.x = obj.position.x;
+        bd.position.y = obj.position.y;
+        bd.type = BodyType.DynamicBody;
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(.15f);
+
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = shape;
+        fixDef.density = 8;
+        fixDef.friction = .3f;
+        fixDef.restitution = .5f;
+
+        Body oBody = oWorld.createBody(bd);
+        oBody.createFixture(fixDef);
+        oBody.setUserData(obj);
+        arrGameObjects.add(obj);
+
+        shape.dispose();
+        cont++;
+        this.res = MathUtils.random(5);
     }
 
     private void createJava(float x, float y) {
@@ -211,6 +253,7 @@ public class Partida extends Screens {
         cont++;
 
         sonido2.play();
+        this.res = MathUtils.random(5);
     }
 
     private void createZombi(float x, float y) {
@@ -222,7 +265,7 @@ public class Partida extends Screens {
         bd.type = BodyType.DynamicBody;
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(.15f);
+        shape.setRadius(.1f);
 
         FixtureDef fixDef = new FixtureDef();
         fixDef.shape = shape;
@@ -239,6 +282,7 @@ public class Partida extends Screens {
         cont++;
 
         sonido1.play();
+        this.res = MathUtils.random(5);
     }
 
     private void createAndroid(float x, float y) {
@@ -268,52 +312,94 @@ public class Partida extends Screens {
         cont++;
 
         sonido3.play();
+        this.res = MathUtils.random(5);
+    }
+
+    private void createJuan(float x, float y) {
+        GameObject obj = new GameObject(x, 12.8f, GameObject.JUAN);
+
+        BodyDef bd = new BodyDef();
+        bd.position.x = obj.position.x;
+        bd.position.y = obj.position.y;
+        bd.type = BodyType.DynamicBody;
+
+        CircleShape shape = new CircleShape();
+        // Aumentar el radio del círculo para hacerlo más grande
+        shape.setRadius(.6f);
+
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.shape = shape;
+        fixDef.density = 30;
+        fixDef.friction = .7f;
+        fixDef.restitution = .5f;
+
+        Body oBody = oWorld.createBody(bd);
+        oBody.createFixture(fixDef);
+        oBody.setUserData(obj);
+        arrGameObjects.add(obj);
+
+        shape.dispose();
+        cont++;
+
+        this.res = MathUtils.random(5);
+    }
+
+    private void mostrarSiguiente(){
+        if (res==0) mensaje = "Pelota";
+        else if (res==1) mensaje = "Zombi";
+        else if (res ==2) mensaje = "Java";
+        else if (res ==3) mensaje = "Android";
+        else if (res ==4) mensaje = "J.Carlos";
+        else mensaje = "Chris";
     }
 
 
     @Override
     public void update(float delta) {
 
+        if (cont <= MAX){
+            if (Gdx.input.justTouched()) {
 
-        // Every time we touch we create a new object
-        if (Gdx.input.justTouched()) {
+                Vector3 touchPos = new Vector3(Gdx.input.getX(), 5, 0);
+                oCamBox2D.unproject(touchPos);
 
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), 5, 0);
-            oCamBox2D.unproject(touchPos);
+                if (res==0) createBall(touchPos.x, touchPos.y);
+                else if (res==1) createZombi(touchPos.x,touchPos.y);
+                else if (res ==2) createJava(touchPos.x, touchPos.y);
+                else if (res ==3) createAndroid(touchPos.x, touchPos.y);
+                else if (res == 4) createJuan(touchPos.x, touchPos.y);
+                else createChris(touchPos.x, touchPos.y);
+            }
 
-            int res = MathUtils.random(3);
+            mostrarSiguiente();
 
-            if (res==0) createBall(touchPos.x, touchPos.y);
-            else if (res==1) createZombi(touchPos.x,touchPos.y);
-            else if (res ==2) createJava(touchPos.x, touchPos.y);
-            else createAndroid(touchPos.x, touchPos.y);
-        }
+            oWorld.step(delta, 8, 6);
+            oWorld.getBodies(arrBodies);
 
-        oWorld.step(delta, 8, 6);
-        oWorld.getBodies(arrBodies);
+            // Eliminate objects that have been hit
+            for (Body body : arrBodies) {
 
-        // Eliminate objects that have been hit
-        for (Body body : arrBodies) {
+                // If the world is locked do not do anything to this body
+                if (oWorld.isLocked()) continue;
 
-            // If the world is locked do not do anything to this body
-            if (oWorld.isLocked()) continue;
+                if (body.getUserData() instanceof GameObject) {
+                    GameObject obj = (GameObject) body.getUserData();
+                    if (obj.state == GameObject.STATE_REMOVE) {
+                        arrGameObjects.removeValue(obj, true);
+                        oWorld.destroyBody(body);
+                    }
+                }
+            }
 
-            if (body.getUserData() instanceof GameObject) {
-                GameObject obj = (GameObject) body.getUserData();
-                if (obj.state == GameObject.STATE_REMOVE) {
-                    arrGameObjects.removeValue(obj, true);
-                    oWorld.destroyBody(body);
+            oWorld.getBodies(arrBodies);
+            for (Body body : arrBodies) {
+                if (body.getUserData() instanceof GameObject) {
+                    GameObject obj = (GameObject) body.getUserData();
+                    obj.update(body, delta);
                 }
             }
         }
 
-        oWorld.getBodies(arrBodies);
-        for (Body body : arrBodies) {
-            if (body.getUserData() instanceof GameObject) {
-                GameObject obj = (GameObject) body.getUserData();
-                obj.update(body, delta);
-            }
-        }
     }
 
     @Override
@@ -326,18 +412,35 @@ public class Partida extends Screens {
         spriteBatch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         spriteBatch.end();
 
-        spriteBatch.begin();
-        Assets.font.draw(spriteBatch, "Puntos: " + puntos, SCREEN_WIDTH-500, SCREEN_HEIGHT - 50);
-        Assets.font.setColor(Color.BROWN);
-        float scaleFactor = 5f;
-        Assets.font.getData().setScale(scaleFactor);
-        spriteBatch.end();
+        if (cont>MAX){
+            spriteBatch.begin();
+            Assets.font.draw(spriteBatch, "HAS PERDIDO, Puntos: " + puntos, 100, SCREEN_HEIGHT/2);
+            Assets.font.setColor(Color.BROWN);
+            float scaleFactor = 5f;
+            Assets.font.getData().setScale(scaleFactor);
+            spriteBatch.end();
+            musica.stop();
+        }
+        else{
+            spriteBatch.begin();
+            Assets.font.draw(spriteBatch, "Puntos: " + puntos, SCREEN_WIDTH - 500, SCREEN_HEIGHT - 50);
+            Assets.font.setColor(Color.BROWN);
+            float scaleFactor = 5f;
+            Assets.font.getData().setScale(scaleFactor);
+            spriteBatch.end();
 
-        spriteBatch.begin();
-        Assets.font.draw(spriteBatch, cont+"/"+MAX, SCREEN_WIDTH-500, SCREEN_HEIGHT - 150);
-        Assets.font.setColor(Color.BROWN);
-        Assets.font.getData().setScale(scaleFactor);
-        spriteBatch.end();
+            spriteBatch.begin();
+            Assets.font.draw(spriteBatch, cont + "/" + MAX, SCREEN_WIDTH - 500, SCREEN_HEIGHT - 150);
+            Assets.font.setColor(Color.BROWN);
+            Assets.font.getData().setScale(scaleFactor);
+            spriteBatch.end();
+
+            spriteBatch.begin();
+            Assets.font.draw(spriteBatch, "Next: " + mensaje, SCREEN_WIDTH - 500, SCREEN_HEIGHT - 250);
+            Assets.font.setColor(Color.BROWN);
+            Assets.font.getData().setScale(scaleFactor);
+            spriteBatch.end();
+        }
 
         oCamBox2D.update();
 
@@ -348,6 +451,7 @@ public class Partida extends Screens {
 
         spriteBatch.end();
         renderer.render(oWorld, oCamBox2D.combined);
+
     }
 
     private void drawGameObjects() {
@@ -358,8 +462,8 @@ public class Partida extends Screens {
                 if (obj.type == GameObject.ZOMBI) {
                     // Ajustar el tamaño del zombi para que sea más grande
                     keyframe = zombi;
-                    spriteBatch.draw(keyframe, obj.position.x - .15f, obj.position.y - .15f, .15f, .15f,
-                            .3f, .3f, 1, 1, obj.angleDeg);
+                    spriteBatch.draw(keyframe, obj.position.x - .1f, obj.position.y - .1f, .1f, .1f,
+                            .2f, .2f, 1, 1, obj.angleDeg);
                 }
                 else if (obj.type == GameObject.JAVA){
                     keyframe = java;
@@ -370,6 +474,16 @@ public class Partida extends Screens {
                     keyframe = android;
                     spriteBatch.draw(keyframe, obj.position.x - .3f, obj.position.y - .3f, .3f, .3f,
                             .6f, .6f, 1, 1, obj.angleDeg);
+                }
+                else if (obj.type == GameObject.JUAN){
+                    keyframe = juan;
+                    spriteBatch.draw(keyframe, obj.position.x - .6f, obj.position.y - .6f, .6f, .6f,
+                            1.2f, 1.2f, 1, 1, obj.angleDeg);
+                }
+                else if (obj.type == GameObject.CHRIS){
+                    keyframe = chris;
+                    spriteBatch.draw(keyframe, obj.position.x - .15f, obj.position.y - .15f, .15f, .15f,
+                            .3f, .3f, 1, 1, obj.angleDeg);
                 }
                 else {
                     keyframe = ball;
