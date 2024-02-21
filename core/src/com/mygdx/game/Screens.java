@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.mygdx.game.classes.Partida;
 
 public abstract class Screens extends InputAdapter implements Screen {
 
@@ -65,13 +66,17 @@ public abstract class Screens extends InputAdapter implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Draw the game elements on the screen
-        draw(delta);
+        try {
+            draw(delta);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // Draw the stage element on the screen
         stage.draw();
     }
 
-    public abstract void draw(float delta);
+    public abstract void draw(float delta) throws InterruptedException;
 
     public abstract void update(float delta) throws InterruptedException;
 
@@ -106,14 +111,17 @@ public abstract class Screens extends InputAdapter implements Screen {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.BACK){
-            if (this instanceof MainMenuScreen) {
-                Gdx.app.exit();
-            } else {
+
+        if (keycode == Input.Keys.BACK) {
+            if (!(game.getScreen() instanceof MainMenuScreen)) {
                 game.setScreen(new MainMenuScreen(game));
+            } else {
+                Gdx.app.exit();
             }
+            return true;
+
         }
-        return super.keyDown(keycode);
+        return false;
     }
 
 }

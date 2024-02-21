@@ -5,7 +5,9 @@ import com.mygdx.game.classes.Partida;
 
 public enum TipoPantalla {
 
-    LEARN_1("JUGAR PARTIDA", Partida.class);
+    PARTIDA("JUGAR PARTIDA", Partida.class),
+    AJUSTES("AJUSTES", Partida.class);
+
 
     public final String name;
     public final Class<? extends Screens> clazz;

@@ -6,16 +6,17 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 
 public class Assets {
 
     public static BitmapFont font;
-
     public static TextButton.TextButtonStyle txButtonStyle;
-    public static Label.LabelStyle labelStyle;
     public static ScrollPane.ScrollPaneStyle scrollPaneStyle;
+    public static TextField.TextFieldStyle txFieldStyle;
 
     public static void load() {
         font = new BitmapFont();
@@ -26,11 +27,11 @@ public class Assets {
                 atlas.createPatch("bt")), new NinePatchDrawable(
                 atlas.createPatch("btDown")), null, font);
 
-        labelStyle = new Label.LabelStyle(Assets.font, Color.GREEN);
-
         NinePatchDrawable knob = new NinePatchDrawable(
                 atlas.createPatch("scroll"));
         scrollPaneStyle = new ScrollPane.ScrollPaneStyle(null, knob, knob, knob, knob);
+
+
     }
 
 }

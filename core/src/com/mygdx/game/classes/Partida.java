@@ -1,6 +1,7 @@
 package com.mygdx.game.classes;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -21,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.utils.*;
 import com.mygdx.game.Assets;
 import com.mygdx.game.MyGdxGame;
@@ -33,10 +35,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 
 public class Partida extends Screens {
-
-    Sound sonido1, sonido2, sonido3;
-    static Sound sonido4;
-    Music musica;
+    Boolean jugando = true;
+    static Music sonido4;
+    static Music musica;
+    Music derrota;
     static int puntos = 0, cont = 0;
     private final static int MAX = 6;
     private int res;
@@ -61,15 +63,16 @@ public class Partida extends Screens {
         this.res = MathUtils.random(4);
         mostrarSiguiente();
 
-        sonido1 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido1.m4a"));
-        sonido2 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido2.m4a"));
-        sonido3 = Gdx.audio.newSound(Gdx.files.internal("sounds/sonido3.m4a"));
-        sonido4 = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion_sound.wav"));
-        sonido4.setVolume(sonido4.play(),0.2f);
+        sonido4 = Gdx.audio.newMusic(Gdx.files.internal("sounds/explosion_sound.wav"));
+        sonido4.setVolume(0.06f);
+
         musica = Gdx.audio.newMusic(Gdx.files.internal("sounds/main_sound.wav"));
         musica.play();
         musica.setLooping(true);
-        musica.setVolume(0.3f);
+        musica.setVolume(0.5f);
+
+        derrota = Gdx.audio.newMusic(Gdx.files.internal("sounds/derrota_sound.wav"));
+        musica.setVolume(0.5f);
 
         background = new TextureRegion(new Texture(Gdx.files.internal("fondo.png")));
 
@@ -252,7 +255,6 @@ public class Partida extends Screens {
         shape.dispose();
         cont++;
 
-        sonido2.play();
         this.res = MathUtils.random(5);
     }
 
@@ -281,7 +283,6 @@ public class Partida extends Screens {
         shape.dispose();
         cont++;
 
-        sonido1.play();
         this.res = MathUtils.random(5);
     }
 
@@ -311,7 +312,6 @@ public class Partida extends Screens {
         shape.dispose();
         cont++;
 
-        sonido3.play();
         this.res = MathUtils.random(5);
     }
 
@@ -324,7 +324,6 @@ public class Partida extends Screens {
         bd.type = BodyType.DynamicBody;
 
         CircleShape shape = new CircleShape();
-        // Aumentar el radio del círculo para hacerlo más grande
         shape.setRadius(.6f);
 
         FixtureDef fixDef = new FixtureDef();
@@ -369,6 +368,7 @@ public class Partida extends Screens {
                 else if (res ==3) createAndroid(touchPos.x, touchPos.y);
                 else if (res == 4) createJuan(touchPos.x, touchPos.y);
                 else createChris(touchPos.x, touchPos.y);
+
             }
 
             mostrarSiguiente();
@@ -403,7 +403,7 @@ public class Partida extends Screens {
     }
 
     @Override
-    public void draw(float delta) {
+    public void draw(float delta) throws InterruptedException {
 
         oCamUI.update();
         spriteBatch.setProjectionMatrix(oCamUI.combined);
@@ -412,14 +412,24 @@ public class Partida extends Screens {
         spriteBatch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         spriteBatch.end();
 
-        if (cont>MAX){
+        if (cont>MAX && jugando==true){
+            derrota.play();
+            jugando=false;
             spriteBatch.begin();
             Assets.font.draw(spriteBatch, "HAS PERDIDO, Puntos: " + puntos, 100, SCREEN_HEIGHT/2);
             Assets.font.setColor(Color.BROWN);
             float scaleFactor = 5f;
             Assets.font.getData().setScale(scaleFactor);
             spriteBatch.end();
+        }
+        else if (jugando==false){
+            Thread.sleep(5000);
+            jugando = true;
             musica.stop();
+            puntos = 0;
+            cont = 0;
+            MainMenuScreen mainMenuScreen = new MainMenuScreen(game);
+            game.setScreen(mainMenuScreen);
         }
         else{
             spriteBatch.begin();
