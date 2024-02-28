@@ -1,10 +1,11 @@
-package com.mygdx.game.classes;
+package com.mygdx.game.juego;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
 public class GameObject {
 
+    //Asigno un id a cada objeto del juego.
     static final int BALL = 0;
     static final int JAVA = 1;
     static final int ZOMBI = 2;
@@ -12,10 +13,13 @@ public class GameObject {
     static final int JUAN = 4;
     static final int CHRIS = 5;
 
+
+    //También a los posibles estados.
     static final int STATE_NORMAL = 0;
     static final int STATE_EXPLODE = 1;
     static final int STATE_REMOVE = 2;
 
+    //Duración de la explosión.
     static final float EXPLOSION_DURATION = 0.95f;
 
     int state;

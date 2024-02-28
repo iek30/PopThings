@@ -16,7 +16,6 @@ public class Assets {
     public static BitmapFont font;
     public static TextButton.TextButtonStyle txButtonStyle;
     public static ScrollPane.ScrollPaneStyle scrollPaneStyle;
-    public static TextField.TextFieldStyle txFieldStyle;
 
     public static void load() {
         font = new BitmapFont();
@@ -30,7 +29,6 @@ public class Assets {
         NinePatchDrawable knob = new NinePatchDrawable(
                 atlas.createPatch("scroll"));
         scrollPaneStyle = new ScrollPane.ScrollPaneStyle(null, knob, knob, knob, knob);
-
 
     }
 

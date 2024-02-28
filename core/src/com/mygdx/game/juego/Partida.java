@@ -1,10 +1,7 @@
-package com.mygdx.game.classes;
+package com.mygdx.game.juego;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -23,22 +20,32 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainMenuScreen;
+import com.mygdx.game.Puntuaciones;
 import com.mygdx.game.utils.*;
 import com.mygdx.game.Assets;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.Screens;
 
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-
 
 public class Partida extends Screens {
+
+    //Sistema de puntuación (lo uso en el método update)
+    Puntuaciones puntuaciones = new Puntuaciones();
+
+
+
+    //Indica si aún no he perdido.
     Boolean jugando = true;
+
+
+
+    //Sonidos.
     static Music sonido4;
-    static Music musica;
     Music derrota;
+
+
+
+    //Variables de puntuación actual y mensajes.
     static int puntos = 0, cont = 0;
     private final static int MAX = 6;
     private int res;
@@ -46,12 +53,15 @@ public class Partida extends Screens {
     Box2DDebugRenderer renderer;
     World oWorld;
 
-    // Save the bodies so later we can access the properties
-    Array<Body> arrBodies;
 
+
+    //Arrays de objetos en juego.
+    Array<Body> arrBodies;
     Array<GameObject> arrGameObjects;
 
-    // Images of the ball and box
+
+
+    // Imágenes de los objetos.
     TextureRegion background, ball, java, zombi, android, juan, chris;
     Animation<TextureRegion> explosion;
 
@@ -60,22 +70,22 @@ public class Partida extends Screens {
     public Partida(MyGdxGame game) {
         super(game);
 
+        //Indico con que objeto se comienza.
         this.res = MathUtils.random(4);
         mostrarSiguiente();
 
+
+        //Declaro el sonido de explosión y le asigno un volumen.
         sonido4 = Gdx.audio.newMusic(Gdx.files.internal("sounds/explosion_sound.wav"));
         sonido4.setVolume(0.06f);
-
-        musica = Gdx.audio.newMusic(Gdx.files.internal("sounds/main_sound.wav"));
-        musica.play();
-        musica.setLooping(true);
-        musica.setVolume(0.5f);
-
+        //Declaro el sonido que aparece cuando pierdes.
         derrota = Gdx.audio.newMusic(Gdx.files.internal("sounds/derrota_sound.wav"));
-        musica.setVolume(0.5f);
-
+        //Asigno el fondo de escenario.
         background = new TextureRegion(new Texture(Gdx.files.internal("fondo.png")));
 
+
+
+        //Asigno características a mi mundo.
         Vector2 gravity = new Vector2(0, -9.8f);
         oWorld = new World(gravity, true);
         oWorld.setContactListener(new CollisionListener());
@@ -84,14 +94,15 @@ public class Partida extends Screens {
         arrBodies = new Array<>();
         arrGameObjects = new Array<>();
 
-        // Load the images
+
+
+        //Cargo las imágenes.
         ball = Utils.getRegion("ball.png");
         java = Utils.getRegion("java.png");
         zombi = Utils.getRegion("zombi.png");
         android = Utils.getRegion("android.png");
         juan = Utils.getRegion("juan.png");
         chris = Utils.getRegion("chris.png");
-
 
         TextureRegion exp1 = Utils.getRegion("explosion/explosion1.png");
         TextureRegion exp2 = Utils.getRegion("explosion/explosion2.png");
@@ -113,16 +124,23 @@ public class Partida extends Screens {
         TextureRegion exp18 = Utils.getRegion("explosion/explosion18.png");
         TextureRegion exp19 = Utils.getRegion("explosion/explosion19.png");
 
+        //Creo la animación de la explosión.
         explosion = new Animation<>(0.05f, exp1, exp2, exp3,
                 exp4, exp5, exp6, exp7, exp8, exp9,
                 exp10, exp11, exp12, exp13, exp14,
                 exp15, exp16, exp17, exp18, exp19);
 
+
+
+        //Creo el suelo y los muros.
         createFloor();
         createLeftWall();
         createRightWall();
     }
 
+
+
+    //CREACIÓN DE LOS MUROS
     private void createFloor() {
         BodyDef bd = new BodyDef();
         bd.position.set(0, .6f);
@@ -175,6 +193,8 @@ public class Partida extends Screens {
     }
 
 
+
+    //CREACIÓN DE LOS OBJETOS
     private void createBall(float x, float y) {
         GameObject obj = new GameObject(x, 12.8f, GameObject.BALL);
 
@@ -343,6 +363,9 @@ public class Partida extends Screens {
         this.res = MathUtils.random(5);
     }
 
+
+
+    //Lo uso para mostrar un mensaje del siguiente objeto.
     private void mostrarSiguiente(){
         if (res==0) mensaje = "Pelota";
         else if (res==1) mensaje = "Zombi";
@@ -351,6 +374,8 @@ public class Partida extends Screens {
         else if (res ==4) mensaje = "J.Carlos";
         else mensaje = "Chris";
     }
+
+
 
 
     @Override
@@ -368,6 +393,8 @@ public class Partida extends Screens {
                 else if (res ==3) createAndroid(touchPos.x, touchPos.y);
                 else if (res == 4) createJuan(touchPos.x, touchPos.y);
                 else createChris(touchPos.x, touchPos.y);
+
+                puntuaciones.saveHighScore(puntos);
 
             }
 
@@ -425,7 +452,6 @@ public class Partida extends Screens {
         else if (jugando==false){
             Thread.sleep(5000);
             jugando = true;
-            musica.stop();
             puntos = 0;
             cont = 0;
             MainMenuScreen mainMenuScreen = new MainMenuScreen(game);

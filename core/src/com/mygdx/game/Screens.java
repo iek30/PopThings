@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.mygdx.game.classes.Partida;
 
 public abstract class Screens extends InputAdapter implements Screen {
 
@@ -30,49 +29,39 @@ public abstract class Screens extends InputAdapter implements Screen {
     public Screens(MyGdxGame game) {
         this.game = game;
 
-        // We will add UI elements to the stage
         stage = new Stage(new StretchViewport(Screens.SCREEN_WIDTH, Screens.SCREEN_HEIGHT));
 
-        // Create the UI Camera and center it on the screen
         oCamUI = new OrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
         oCamUI.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
 
-        // Create the Game Camera and center it on the screen
         oCamBox2D = new OrthographicCamera(WORLD_WIDTH, WORLD_HEIGHT);
         oCamBox2D.position.set(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f, 0);
 
-        // We need it to tell the InputAdapter and stage when we receive events
         InputMultiplexer input = new InputMultiplexer(this, stage);
         Gdx.input.setInputProcessor(input);
 
         spriteBatch = new SpriteBatch();
     }
 
-    // This functions will be called automatically 60 times per second (60 FPS)
+    // Se llama cada 60fps
     @Override
     public void render(float delta) {
 
-        // Update all the physics of the game
         try {
             update(delta);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        // Update the stage (mostly UI elements)
         stage.act(delta);
-
-        // Clear everything on the screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Draw the game elements on the screen
         try {
             draw(delta);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        // Draw the stage element on the screen
         stage.draw();
     }
 
@@ -82,7 +71,6 @@ public abstract class Screens extends InputAdapter implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        // If the screen size change we adjust the stage
         stage.getViewport().update(width, height, true);
     }
 
@@ -109,19 +97,20 @@ public abstract class Screens extends InputAdapter implements Screen {
     public void dispose() {
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
 
-        if (keycode == Input.Keys.BACK) {
-            if (!(game.getScreen() instanceof MainMenuScreen)) {
-                game.setScreen(new MainMenuScreen(game));
-            } else {
+
+    @Override
+    public boolean keyUp(int keycode) {
+        if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK){
+
+            if (this instanceof MainMenuScreen) {
                 Gdx.app.exit();
+            } else {
+                game.setScreen(new MainMenuScreen(game));
             }
-            return true;
 
         }
-        return false;
+        return super.keyDown(keycode);
     }
 
 }

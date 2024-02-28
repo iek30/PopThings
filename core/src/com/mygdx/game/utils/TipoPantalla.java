@@ -1,12 +1,12 @@
 package com.mygdx.game.utils;
 
 import com.mygdx.game.Screens;
-import com.mygdx.game.classes.Partida;
+import com.mygdx.game.juego.Partida;
 
 public enum TipoPantalla {
 
     PARTIDA("JUGAR PARTIDA", Partida.class),
-    AJUSTES("AJUSTES", Partida.class);
+    AJUSTES("MEJOR PARTIDA", Partida.class);
 
 
     public final String name;

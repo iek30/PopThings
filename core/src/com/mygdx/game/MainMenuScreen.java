@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -8,20 +9,23 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.mygdx.game.classes.Partida;
+import com.mygdx.game.juego.Partida;
 import com.mygdx.game.settings.Ajustes;
 import com.mygdx.game.utils.TipoPantalla;
 
 public class MainMenuScreen extends Screens {
-
-    //private FirebaseDatabase database = FirebaseDatabase.getInstance("https://que-pasa-app-android-default-rtdb.europe-west1.firebasedatabase.app");
-    //private DatabaseReference messagesRef = database.getReference("messages");
-
     ScrollPane scroll;
     TextureRegion background = new TextureRegion(new Texture(Gdx.files.internal("fondo_menu.png")));
+    static Music musica = Gdx.audio.newMusic(Gdx.files.internal("sounds/main_sound.wav"));;
 
     public MainMenuScreen(MyGdxGame game) {
         super(game);
+
+        if (!musica.isPlaying()){
+            musica.play();
+            musica.setLooping(true);
+            musica.setVolume(0.5f);
+        }
 
         Table menu = new Table();
         menu.setFillParent(true); // La tabla ocupa todo el espacio del escenario
@@ -65,6 +69,7 @@ public class MainMenuScreen extends Screens {
 
     @Override
     public void update(float delta) {
+
     }
 
 }
